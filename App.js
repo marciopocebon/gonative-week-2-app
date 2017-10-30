@@ -1,57 +1,84 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
+
 import {
-  Platform,
-  StyleSheet,
+  Container,
+  Content,
+  Header,
+  Tab,
+  Tabs,
+  Body,
+  Title,
+  List,
+  ListItem,
+  Left,
+  Right,
+  Thumbnail,
   Text,
-  View
-} from 'react-native';
+} from 'native-base';
 
-const instructions = Platform.select({
-  ios: 'Press Cmd+R to reload,\n' +
-    'Cmd+D or shake for dev menu',
-  android: 'Double tap R on your keyboard to reload,\n' +
-    'Shake or press menu button for dev menu',
-});
+export default class App extends Component {
+  state = {
+    repos: [],
+    users: [],
+  };
 
-export default class App extends Component<{}> {
+  async componentDidMount() {
+    const baseURL = 'https://api.github.com';
+    const options = {
+      headers: {
+        'User-Agent': 'GithubApp',
+      },
+    };
+
+    const usersResponse = await fetch(`${baseURL}/orgs/rocketseat/members`, options);
+    const reposResponse = await fetch(`${baseURL}/orgs/rocketseat/repos`, options);
+
+    this.setState({
+      users: await usersResponse.json(),
+      repos: await reposResponse.json(),
+    });
+  }
+
   render() {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
-        <Text style={styles.instructions}>
-          {instructions}
-        </Text>
-      </View>
+      <Container>
+        <Header hasTabs>
+          <Body>
+            <Title>Github</Title>
+          </Body>
+        </Header>
+        <Tabs initialPage={0}>
+          <Tab heading="Repositórios">
+            <Content>
+              <List>
+                { this.state.repos.map(repo => (
+                  <ListItem key={repo.id}>
+                    <Body>
+                      <Text>{repo.name}</Text>
+                      <Text note>{repo.html_url}</Text>
+                    </Body>
+                  </ListItem>
+                )) }
+              </List>
+            </Content>
+          </Tab>
+          <Tab heading="Usuários">
+            <List>
+              { this.state.users.map(user => (
+                <ListItem avatar key={user.id}>
+                  <Left>
+                    <Thumbnail small source={{ uri: user.avatar_url }} />
+                  </Left>
+                  <Body>
+                    <Text>{user.login}</Text>
+                    <Text note>{user.html_url}</Text>
+                  </Body>
+                </ListItem>
+              )) }
+            </List>
+          </Tab>
+        </Tabs>
+      </Container>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
-});
