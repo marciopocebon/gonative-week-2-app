@@ -1,0 +1,3 @@
+rootProject.name = 'cpl2'
+
+include ':app'
